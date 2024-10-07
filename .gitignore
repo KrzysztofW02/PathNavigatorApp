@@ -1,0 +1,69 @@
+# System files
+.DS_Store
+Thumbs.db
+
+# Node.js dependencies
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Cordova generated files
+/plugins/
+/platforms/
+/www/
+
+# Cordova-specific files
+merges/
+native/
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Optional npm cache directory
+.npm/
+
+# Optional eslint cache
+.eslintcache
+
+# Environment Variables
+.env
+
+# Build and deployment directories (optional, depends on your build process)
+dist/
+build/
+
+# OS specific files
+.idea/
+.vscode/
+*.sublime-workspace
+
+# Temporary files
+tmp/
+temp/
+
+# Optional git history files
+.git/
+
+# Specific to Express.js
+logs/
+*.log
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Cordova Native files (optional, if you're adding native code)
+*.xcworkspace
+*.xcodeproj
+*.xcuserdata/
+*.swp
+
+# Mac files
+__MACOSX/
+
+# Lock files
+package-lock.json
+yarn.lock

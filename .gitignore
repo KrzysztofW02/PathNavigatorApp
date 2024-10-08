@@ -13,7 +13,6 @@ yarn-error.log*
 # Cordova generated files
 /plugins/
 /platforms/
-/www/
 
 # Cordova-specific files
 merges/

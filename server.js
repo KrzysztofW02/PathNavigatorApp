@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const port = 3000;
+const cors = require('cors');
 
 const routes = [
   {
@@ -34,6 +35,7 @@ const routes = [
     ]
   }
 ];
+app.use(cors());
 
 app.get('/api/routes', (req, res) => {
   res.json(routes);

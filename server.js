@@ -41,6 +41,18 @@ app.get('/api/routes', (req, res) => {
   res.json(routes);
 });
 
+app.get('/api/routes/:id/waypoints', (req, res) => {
+  const routeId = parseInt(req.params.id);
+  const route = routes.find(route => route.id === routeId);
+
+  if (route) {
+    res.json(route.waypoints);
+  } else {
+    res.status(404).json({ message: 'Route not found' });
+  }
+});
+
+
 app.listen(port, () => {
   console.log(`Serwer działa na http://localhost:${port}`);
 });

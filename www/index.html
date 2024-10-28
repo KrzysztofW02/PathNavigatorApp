@@ -2,15 +2,18 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+        <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
         <meta name="format-detection" content="telephone=no">
         <meta name="msapplication-tap-highlight" content="no">
-        <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
         <meta name="color-scheme" content="light dark">
-        <link rel="stylesheet" href="css/index.css">
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+        <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://unpkg.com data: https://ssl.gstatic.com; script-src 'self' 'unsafe-inline' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; media-src *; img-src 'self' data: content:;"> -->
+
         <title>PathNavigatorApp</title>
-        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+              integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+              crossorigin=""/>
+        <link rel="stylesheet" href="css/index.css">
+
         <style>
             #map {
                 height: 400px; 
@@ -28,7 +31,25 @@
             </div>
             <div id="map"></div>
         </div>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+                integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+                crossorigin=""></script>
+
         <script src="cordova.js"></script>
+
         <script src="js/index.js"></script>
+
+        <script>
+            document.addEventListener('deviceready', function () {
+                console.log("Device is ready. Checking if Leaflet is loaded...");
+                if (typeof L === 'undefined') {
+                    console.error("Leaflet library (L) is not loaded after device is ready!");
+                    return;
+                } else {
+                    console.log("Leaflet library (L) is available. Initializing app...");
+                    initApp(); 
+                }
+            });
+        </script>
     </body>
 </html>

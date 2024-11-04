@@ -35,7 +35,9 @@ const routes = [
     ]
   }
 ];
-app.use(cors());
+app.use(cors({
+  origin: '*' 
+}));
 
 app.get('/api/routes', (req, res) => {
   res.json(routes);

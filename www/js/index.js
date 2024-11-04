@@ -24,17 +24,18 @@ function initApp() {
         return;
     }
 
-    var url = "http://10.0.2.2:3000/api/routes"; 
-    cordova.plugin.http.get(url, {}, {}, function (response) {
-        try {
+    var url = "http://localhost:3000/api/routes"; 
+    if (navigator.onLine) {
+        cordova.plugin.http.get(url, {}, {}, function (response) {
             let routes = JSON.parse(response.data);
             displayRoutes(routes);
-        } catch (e) {
-            console.error("Error parsing JSON: ", e);
-        }
-    }, function(error) {
-        console.error(error);
-    });
+        }, function(error) {
+            console.error("Error fetching routes: ", error);
+        });
+    } else {
+        console.log("Offline mode: Loading routes from local storage...");
+        loadOfflineRoutes();
+    }
 
     console.log("Setting up the map...");
     var map = L.map('map').setView([51.505, -0.09], 13);
@@ -78,9 +79,11 @@ function getLocation(map) {
 
 function displayRoutes(routes) {
     var routeList = document.getElementById("route-list");
-    
+
     if (routeList) {
         console.log("Route list element found. Displaying routes...");
+        
+        routeList.innerHTML = '';
 
         routes.forEach(route => {
             let li = document.createElement("li");
@@ -100,13 +103,15 @@ function displayRoutes(routes) {
     }
 }
 
+
 function selectRoute(routeId) {
-    var url = `http://10.0.2.2:3000/api/routes/${routeId}/waypoints`; 
+    var url = `http://localhost:3000/api/routes/${routeId}/waypoints`; 
 
     console.log(`Fetching waypoints for route ID: ${routeId}...`);
 
     cordova.plugin.http.get(url, {}, {}, function (response) {
         let waypoints = JSON.parse(response.data);
+        saveRouteOffline(routeId, waypoints);
         displayWaypoints(waypoints);
     }, function(error) {
         console.error("Error fetching waypoints: ", error);
@@ -117,4 +122,27 @@ function displayWaypoints(waypoints) {
     waypoints.forEach(waypoint => {
         console.log(`Waypoint: ${waypoint.name}, Coordinates: (${waypoint.lat}, ${waypoint.lng})`);
     });
+}
+
+function saveRouteOffline(routeId, waypoints) {
+    const routeData = JSON.stringify(waypoints);
+    localStorage.setItem(`route-${routeId}`, routeData);
+}
+
+function loadRouteOffline(routeId) {
+    const routeData = localStorage.getItem(`route-${routeId}`);
+    return routeData ? JSON.parse(routeData) : null;
+}
+
+function loadOfflineRoutes() {
+    const routeList = [];
+    
+    for (let key in localStorage) {
+        if (key.startsWith("route-")) { 
+            const routeId = key.split("-")[1];
+            const waypoints = loadRouteOffline(routeId);
+            routeList.push({ id: routeId, waypoints });
+        }
+    }
+    displayRoutes(routeList); 
 }

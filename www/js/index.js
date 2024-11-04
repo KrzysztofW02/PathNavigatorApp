@@ -28,7 +28,6 @@ function initApp() {
     cordova.plugin.http.get(url, {}, {}, function (response) {
         try {
             let routes = JSON.parse(response.data);
-            console.log("Parsed routes: ", routes);
             displayRoutes(routes);
         } catch (e) {
             console.error("Error parsing JSON: ", e);
@@ -38,27 +37,41 @@ function initApp() {
     });
 
     console.log("Setting up the map...");
-
     var map = L.map('map').setView([51.505, -0.09], 13);
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    L.marker([51.5, -0.09]).addTo(map)
-        .bindPopup('A pretty CSS popup.<br> Easily customizable.')
-        .openPopup();
+    getLocation(map);
+}
 
-    navigator.geolocation.getCurrentPosition(onSuccess, onError);
+function getLocation(map) {
+    const locationDisplay = document.getElementById("location-display");
 
-    function onSuccess(position) {
-        console.log('Latitude: ' + position.coords.latitude + '\n' +
-                    'Longitude: ' + position.coords.longitude + '\n');
-        map.setView([position.coords.latitude, position.coords.longitude], 13);
-    }
+    if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(
+            function (position) {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
 
-    function onError(error) {
-        console.error('Error getting geolocation: ' + error.message);
+                locationDisplay.innerHTML = `Latitude: ${lat}<br>Longitude: ${lng}`;
+                map.setView([lat, lng], 13);
+
+                L.marker([lat, lng]).addTo(map)
+            },
+            function (error) {
+                console.error('Error with watchPosition:', error.message);
+                locationDisplay.innerHTML = "Error retrieving location.";
+            },
+            {
+                enableHighAccuracy: true,
+                maximumAge: 30000,
+                timeout: 27000
+            }
+        );
+    } else {
+        locationDisplay.innerHTML = "Geolocation is not supported by this browser.";
     }
 }
 

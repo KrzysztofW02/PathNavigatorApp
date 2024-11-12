@@ -7,34 +7,35 @@ const routes = [
   {
     id: 1,
     name: 'Trasa Górska',
-    description: 'Przyjemna wycieczka przez górskie szlaki',
+    description: 'Przyjemna wycieczka przez górskie szlaki w okolicy Bielska-Białej',
     waypoints: [
-      { id: 1, name: 'Start', description: 'Początek trasy', lat: 49.2827, lng: 19.9383 },
-      { id: 2, name: 'Punkt Widokowy', description: 'Piękny widok na dolinę', lat: 49.2987, lng: 19.9723 },
-      { id: 3, name: 'Meta', description: 'Koniec trasy', lat: 49.3101, lng: 19.9876 },
+      { id: 1, name: 'Start - Dolina Wapienicy', description: 'Początek trasy', lat: 49.7851, lng: 18.9816 },
+      { id: 2, name: 'Przełęcz Łysa', description: 'Piękny widok na okoliczne góry', lat: 49.7729, lng: 18.9652 },
+      { id: 3, name: 'Meta - Szczyt Klimczok', description: 'Koniec trasy', lat: 49.7558, lng: 18.9574 },
     ]
   },
   {
     id: 2,
     name: 'Spacer po Mieście',
-    description: 'Zwiedzanie zabytkowych ulic miasta',
+    description: 'Zwiedzanie atrakcji Bielska-Białej',
     waypoints: [
-      { id: 1, name: 'Rynek', description: 'Główny plac miasta', lat: 50.0621, lng: 19.9382 },
-      { id: 2, name: 'Kościół Mariacki', description: 'Zabytkowy kościół', lat: 50.0625, lng: 19.9397 },
-      { id: 3, name: 'Wawel', description: 'Zamek królewski', lat: 50.0540, lng: 19.9366 },
+      { id: 1, name: 'Plac Chrobrego', description: 'Główny plac w mieście', lat: 49.78420, lng: 19.0600 },
+      { id: 2, name: 'Zamek Sułkowskich', description: 'Zabytkowy zamek z XVIII wieku', lat: 49.78422, lng: 19.0611 },
+      { id: 3, name: 'Rynek', description: 'Centralny rynek z klimatycznymi kamienicami', lat: 49.78522, lng: 19.0622 },
     ]
   },
   {
     id: 3,
     name: 'Wycieczka po Lesie',
-    description: 'Trasa przez malowniczy las',
+    description: 'Trasa przez malowniczy las w pobliżu Bielska-Białej',
     waypoints: [
-      { id: 1, name: 'Wejście do lasu', description: 'Początek ścieżki', lat: 52.2297, lng: 21.0122 },
-      { id: 2, name: 'Środek lasu', description: 'Cicha i spokojna okolica', lat: 52.2397, lng: 21.0222 },
-      { id: 3, name: 'Polana', description: 'Miejsce na odpoczynek', lat: 52.2497, lng: 21.0322 },
+      { id: 1, name: 'Wejście do Lasu Cygańskiego', description: 'Początek leśnej ścieżki', lat: 49.8168, lng: 19.0345 },
+      { id: 2, name: 'Polana z Altaną', description: 'Miejsce na odpoczynek z widokiem na góry', lat: 49.8129, lng: 19.0256 },
+      { id: 3, name: 'Szczyt Dębowiec', description: 'Punkt końcowy trasy, widok na Beskidy', lat: 49.8009, lng: 19.0238 },
     ]
   }
 ];
+
 app.use(cors({
   origin: '*' 
 }));

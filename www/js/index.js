@@ -16,6 +16,8 @@ document.addEventListener('deviceready', function () {
     );
 });
 
+let map;
+
 function initApp() {
     console.log("Initializing the app...");
 
@@ -24,7 +26,7 @@ function initApp() {
         return;
     }
 
-    var url = "http://localhost:3000/api/routes"; 
+    const url = "http://localhost:3000/api/routes"; 
     if (navigator.onLine) {
         cordova.plugin.http.get(url, {}, {}, function (response) {
             let routes = JSON.parse(response.data);
@@ -38,17 +40,22 @@ function initApp() {
     }
 
     console.log("Setting up the map...");
-    var map = L.map('map').setView([51.505, -0.09], 13);
+    map = L.map('map').setView([51.505, -0.09], 13); 
 
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    getLocation(map);
+    getLocation();
 }
 
-function getLocation(map) {
+function getLocation() {
     const locationDisplay = document.getElementById("location-display");
+
+    if (!map) {
+        console.error("Map is not initialized");
+        return;
+    }
 
     if (navigator.geolocation) {
         navigator.geolocation.watchPosition(
@@ -59,7 +66,7 @@ function getLocation(map) {
                 locationDisplay.innerHTML = `Latitude: ${lat}<br>Longitude: ${lng}`;
                 map.setView([lat, lng], 13);
 
-                L.marker([lat, lng]).addTo(map)
+                L.marker([lat, lng]).addTo(map);
             },
             function (error) {
                 console.error('Error with watchPosition:', error.message);
@@ -75,7 +82,6 @@ function getLocation(map) {
         locationDisplay.innerHTML = "Geolocation is not supported by this browser.";
     }
 }
-
 
 function displayRoutes(routes) {
     var routeList = document.getElementById("route-list");
@@ -104,8 +110,11 @@ function displayRoutes(routes) {
 }
 
 
+let selectedRouteId = null; 
+
 function selectRoute(routeId) {
-    var url = `http://localhost:3000/api/routes/${routeId}/waypoints`; 
+    selectedRouteId = routeId;
+    const url = `http://localhost:3000/api/routes/${routeId}/waypoints`; 
 
     console.log(`Fetching waypoints for route ID: ${routeId}...`);
 
@@ -118,11 +127,17 @@ function selectRoute(routeId) {
     });
 }
 
+
 function displayWaypoints(waypoints) {
     waypoints.forEach(waypoint => {
         console.log(`Waypoint: ${waypoint.name}, Coordinates: (${waypoint.lat}, ${waypoint.lng})`);
+        L.marker([waypoint.lat, waypoint.lng]).addTo(map).bindPopup(waypoint.name);
     });
+
+    const latLngs = waypoints.map(wp => [wp.lat, wp.lng]);
+    L.polyline(latLngs, { color: 'blue' }).addTo(map);
 }
+
 
 function saveRouteOffline(routeId, waypoints) {
     const routeData = JSON.stringify(waypoints);
@@ -146,3 +161,33 @@ function loadOfflineRoutes() {
     }
     displayRoutes(routeList); 
 }
+
+function startNavigation() {
+    console.log("Starting navigation...");
+    
+    if (!selectedRouteId) {
+        console.error("No route selected for navigation.");
+        return;
+    }
+
+    const waypoints = JSON.parse(localStorage.getItem(`route-${selectedRouteId}`)); 
+
+    if (!waypoints || waypoints.length === 0) {
+        console.error("No waypoints available for navigation.");
+        return;
+    }
+
+    console.log("Starting navigation using Leaflet Routing Machine...");
+    L.Routing.control({
+        waypoints: waypoints.map(wp => L.latLng(wp.lat, wp.lng)),
+        routeWhileDragging: true,
+        show: true,
+        createMarker: function(i, wp, n) {
+            return L.marker(wp.latLng).bindPopup(waypoints[i].name);
+        }
+    }).addTo(map);
+}
+
+
+
+

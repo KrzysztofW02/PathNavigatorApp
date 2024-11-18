@@ -49,6 +49,9 @@ function initApp() {
     getLocation();
 }
 
+let shouldCenterMap = true; 
+let currentLocationMarker = null; 
+
 function getLocation() {
     const locationDisplay = document.getElementById("location-display");
 
@@ -64,9 +67,16 @@ function getLocation() {
                 const lng = position.coords.longitude;
 
                 locationDisplay.innerHTML = `Latitude: ${lat}<br>Longitude: ${lng}`;
-                map.setView([lat, lng], 13);
 
-                L.marker([lat, lng]).addTo(map);
+                if (currentLocationMarker) {
+                    currentLocationMarker.setLatLng([lat, lng]);
+                } else {
+                    currentLocationMarker = L.marker([lat, lng]).addTo(map);
+                }
+
+                if (shouldCenterMap) {
+                    map.setView([lat, lng], 13);
+                }
             },
             function (error) {
                 console.error('Error with watchPosition:', error.message);
@@ -78,6 +88,10 @@ function getLocation() {
                 timeout: 27000
             }
         );
+
+        map.on('movestart', function () {
+            shouldCenterMap = false;
+        });
     } else {
         locationDisplay.innerHTML = "Geolocation is not supported by this browser.";
     }
@@ -233,8 +247,12 @@ function displayRouteWithRoutingMachine(waypoints) {
     }).addTo(map);
 }
 
-
-
-
-
-
+function centerOnCurrentLocation() {
+    if (currentLocationMarker) {
+        const latLng = currentLocationMarker.getLatLng();
+        map.setView(latLng, 13); 
+        shouldCenterMap = true; 
+    } else {
+        console.log("Current location is not available yet.");
+    }
+}

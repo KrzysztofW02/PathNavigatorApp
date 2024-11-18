@@ -110,34 +110,57 @@ function displayRoutes(routes) {
 }
 
 
-let selectedRouteId = null; 
+let selectedRouteId = null;
+let currentPolyline = null;
+let currentMarkers = [];
+let routingControl = null;
 
 function selectRoute(routeId) {
+    if (selectedRouteId === routeId) {
+        console.log("This route is already selected.");
+        return; 
+    }
+
+    if (routingControl) {
+        map.removeControl(routingControl);
+        routingControl = null;
+    }
+
+    if (currentPolyline) {
+        map.removeLayer(currentPolyline);
+        currentPolyline = null;
+    }
+    if (currentMarkers.length > 0) {
+        currentMarkers.forEach(marker => map.removeLayer(marker));
+        currentMarkers = [];
+    }
+
     selectedRouteId = routeId;
-    const url = `http://localhost:3000/api/routes/${routeId}/waypoints`; 
+    const url = `http://localhost:3000/api/routes/${routeId}/waypoints`;
 
     console.log(`Fetching waypoints for route ID: ${routeId}...`);
 
     cordova.plugin.http.get(url, {}, {}, function (response) {
         let waypoints = JSON.parse(response.data);
         saveRouteOffline(routeId, waypoints);
-        displayWaypoints(waypoints);
-    }, function(error) {
+
+        displayRouteWithRoutingMachine(waypoints);
+    }, function (error) {
         console.error("Error fetching waypoints: ", error);
     });
 }
 
 
+
 function displayWaypoints(waypoints) {
-    waypoints.forEach(waypoint => {
-        console.log(`Waypoint: ${waypoint.name}, Coordinates: (${waypoint.lat}, ${waypoint.lng})`);
-        L.marker([waypoint.lat, waypoint.lng]).addTo(map).bindPopup(waypoint.name);
+    const latLngs = waypoints.map(wp => {
+        let marker = L.marker([wp.lat, wp.lng]).addTo(map).bindPopup(wp.name);
+        currentMarkers.push(marker); 
+        return [wp.lat, wp.lng];
     });
 
-    const latLngs = waypoints.map(wp => [wp.lat, wp.lng]);
-    L.polyline(latLngs, { color: 'blue' }).addTo(map);
+    currentPolyline = L.polyline(latLngs, { color: 'blue', weight: 4 }).addTo(map);
 }
-
 
 function saveRouteOffline(routeId, waypoints) {
     const routeData = JSON.stringify(waypoints);
@@ -164,7 +187,7 @@ function loadOfflineRoutes() {
 
 function startNavigation() {
     console.log("Starting navigation...");
-    
+
     if (!selectedRouteId) {
         console.error("No route selected for navigation.");
         return;
@@ -177,16 +200,40 @@ function startNavigation() {
         return;
     }
 
-    console.log("Starting navigation using Leaflet Routing Machine...");
-    L.Routing.control({
+    if (routingControl) {
+        map.removeControl(routingControl);
+    }
+
+    console.log("Drawing route using Leaflet Routing Machine...");
+    routingControl = L.Routing.control({
         waypoints: waypoints.map(wp => L.latLng(wp.lat, wp.lng)),
-        routeWhileDragging: true,
+        routeWhileDragging: false,
+        draggableWaypoints: false,
+        addWaypoints: false,
         show: true,
-        createMarker: function(i, wp, n) {
-            return L.marker(wp.latLng).bindPopup(waypoints[i].name);
+        lineOptions: {
+            styles: [{ color: 'red', weight: 6 }]
         }
     }).addTo(map);
 }
+
+function displayRouteWithRoutingMachine(waypoints) {
+    const leafletWaypoints = waypoints.map(wp => L.latLng(wp.lat, wp.lng));
+
+    routingControl = L.Routing.control({
+        waypoints: leafletWaypoints,
+        routeWhileDragging: false,
+        draggableWaypoints: false,
+        addWaypoints: false,
+        show: true,
+        lineOptions: {
+            styles: [{ color: 'blue', weight: 4 }]
+        },
+        createMarker: function() { return null; } 
+    }).addTo(map);
+}
+
+
 
 
 

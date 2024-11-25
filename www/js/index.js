@@ -165,7 +165,6 @@ function selectRoute(routeId) {
 }
 
 
-
 function displayWaypoints(waypoints) {
     const latLngs = waypoints.map(wp => {
         let marker = L.marker([wp.lat, wp.lng]).addTo(map).bindPopup(wp.name);
@@ -231,6 +230,8 @@ function startNavigation() {
     }).addTo(map);
 }
 
+let isRouteReady = false;
+
 function displayRouteWithRoutingMachine(waypoints) {
     const leafletWaypoints = waypoints.map(wp => L.latLng(wp.lat, wp.lng));
 
@@ -245,7 +246,15 @@ function displayRouteWithRoutingMachine(waypoints) {
         },
         createMarker: function() { return null; } 
     }).addTo(map);
+
+    routingControl.on('routesfound', function(e) {
+        console.log("Route has been successfully generated.");
+        routeCoordinates = e.routes[0].coordinates; 
+    });
 }
+
+
+
 
 function centerOnCurrentLocation() {
     if (currentLocationMarker) {
@@ -256,3 +265,40 @@ function centerOnCurrentLocation() {
         console.log("Current location is not available yet.");
     }
 }
+
+function simulateNavigation() {
+    console.log("Starting simulation...");
+
+    if (!routeCoordinates || routeCoordinates.length === 0) {
+        console.error("No route data available.");
+        return;
+    }
+
+    let index = 0;
+    const totalDuration = 5000; 
+    const interval = totalDuration / routeCoordinates.length; 
+
+    const simulationInterval = setInterval(() => {
+        if (index >= routeCoordinates.length) {
+            clearInterval(simulationInterval);
+            console.log("Simulation completed.");
+            return;
+        }
+
+        const { lat, lng } = routeCoordinates[index];
+        console.log(`Simulated location: (${lat}, ${lng})`);
+
+        if (currentLocationMarker) {
+            currentLocationMarker.setLatLng([lat, lng]);
+        } else {
+            currentLocationMarker = L.marker([lat, lng]).addTo(map);
+        }
+
+        if (shouldCenterMap) {
+            map.setView([lat, lng], 13);
+        }
+
+        index++; 
+    }, interval); 
+}
+

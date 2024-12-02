@@ -159,6 +159,8 @@ function selectRoute(routeId) {
         saveRouteOffline(routeId, waypoints);
 
         displayRouteWithRoutingMachine(waypoints);
+        const lastWaypoint = waypoints[waypoints.length - 1];
+        checkArrival(lastWaypoint);
     }, function (error) {
         console.error("Error fetching waypoints: ", error);
     });
@@ -254,8 +256,6 @@ function displayRouteWithRoutingMachine(waypoints) {
 }
 
 
-
-
 function centerOnCurrentLocation() {
     if (currentLocationMarker) {
         const latLng = currentLocationMarker.getLatLng();
@@ -266,8 +266,11 @@ function centerOnCurrentLocation() {
     }
 }
 
+let hasArrived = false; 
+
 function simulateNavigation() {
     console.log("Starting simulation...");
+    hasArrived = false;
 
     if (!routeCoordinates || routeCoordinates.length === 0) {
         console.error("No route data available.");
@@ -281,7 +284,7 @@ function simulateNavigation() {
     const simulationInterval = setInterval(() => {
         if (index >= routeCoordinates.length) {
             clearInterval(simulationInterval);
-            console.log("Simulation completed.");
+            console.log("Dotarłeś do miejsca.");
             return;
         }
 
@@ -302,3 +305,47 @@ function simulateNavigation() {
     }, interval); 
 }
 
+
+function checkArrival(lastWaypoint) {
+    watchId = navigator.geolocation.watchPosition(
+        function (position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+
+            const distance = calculateDistance(lat, lng, lastWaypoint.lat, lastWaypoint.lng);
+            if (!hasArrived && distance <= 50) { 
+                hasArrived = true; 
+                alert(`Witamy na miejscu! ${lastWaypoint.name}`);
+                stopWatchingLocation(); 
+            }
+        },
+        function (error) {
+            console.error('Błąd podczas sprawdzania lokalizacji:', error.message);
+        },
+        { enableHighAccuracy: true }
+    );
+}
+
+let watchId = null;
+
+function stopWatchingLocation() {
+    if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+    }
+}
+
+function calculateDistance(lat1, lng1, lat2, lng2) {
+    const R = 6371e3; 
+    const φ1 = lat1 * Math.PI / 180;
+    const φ2 = lat2 * Math.PI / 180;
+    const Δφ = (lat2 - lat1) * Math.PI / 180;
+    const Δλ = (lng2 - lng1) * Math.PI / 180;
+
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+              Math.cos(φ1) * Math.cos(φ2) *
+              Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; 
+}
